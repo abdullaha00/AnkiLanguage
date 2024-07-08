@@ -6,7 +6,13 @@ import Link from "next/link";
 
 export default function SideNav() {
 
-    const SidenavEntry = ({ icon }) => {
+    type sidenavEntryProps = {
+
+        icon: JSX.Element;
+
+    }
+
+    const SidenavEntry = ({ icon } : sidenavEntryProps) => {
         return (
             <Link href="/main" className="sidenavEntry">
                 {icon}
