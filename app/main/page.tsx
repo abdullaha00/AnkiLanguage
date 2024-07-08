@@ -20,10 +20,13 @@ export default function Page() {
 
         if (isRunning) {
 
-            const v = invoke('deckNames', 6);
-            setDeckArray(v);
-            console.log(v);
+            const fetchDeckNames = async () => {
+                const v = await invoke('deckNames', 6);
+                setDeckArray(v);
+                console.log(v);
         }
+            fetchDeckNames();
+    }
 
     }, [isRunning])
 
