@@ -1,6 +1,6 @@
 'use client'
 
-import { isAnkiConnectRunning, getAnkiConnectVersion, invoke } from "../ankiConnect";
+import { isAnkiConnectRunning, invoke } from "../ankiConnect";
 import { useState, useEffect } from 'react'
 
 export default function Page() {
