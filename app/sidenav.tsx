@@ -14,7 +14,7 @@ export default function SideNav() {
 
     const SidenavEntry = ({ icon } : sidenavEntryProps) => {
         return (
-            <Link href="/main" className="sidenavEntry">
+            <Link href="/anki" className="sidenavEntry">
                 {icon}
             </Link>)
     };

@@ -20,7 +20,7 @@ export default function RootLayout({
       <body className={inter.className}>
         <div>
           <SideNav/>
-        <div>
+        <div className="mx-40">
         {children}
         </div>
         </div>
