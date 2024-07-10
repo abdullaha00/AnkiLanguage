@@ -136,7 +136,7 @@ export default function Page() {
               <label>Select a deck: </label>
 
             <select className="block text-black" onChange={e => {setCurrentDeck(e.target.value); console.log(e.target.value)}}>
-                {deckNames.map((deck, _index) => (<option className="text-black" value={deck}>
+                {deckNames.map((deck, index) => (<option key={index} className="text-black" value={deck}>
                     {deck}
                     </option>))}
             </select>
@@ -145,7 +145,7 @@ export default function Page() {
               <label>Select a note type: </label>
 
             <select className="block text-black" onChange={e => {setCurrentNote(e.target.value); console.log(e.target.value)}}>
-                {noteTypes.map((noteType, _index) => (<option className="text-black" value={noteType}>
+                {noteTypes.map((noteType, index) => (<option key={index} className="text-black" value={noteType}>
                     {noteType}
                     </option>))}
             </select>
@@ -154,7 +154,7 @@ export default function Page() {
               <label>Sentence field: </label>
 
             <select className="block text-black" onChange={e => {setCurrentField(e.target.value); console.log(e.target.value)}}>
-                {fields.map((field, _index) => (<option className="text-black" value={field}>
+                {fields.map((field, index) => (<option key={index} className="text-black" value={field}>
                     {field}
                     </option>))}
             </select>
