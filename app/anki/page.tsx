@@ -17,7 +17,7 @@ export default function Page() {
     const [vocabSize, setVocabSize] = useState(0);
     const [knownWordCount, setKnownWordCount] = useState(0);
     const [totalWordCount, setTotalWordCount] = useState(0);
-    const [vocabArr, setVocabArr] = useState([]);
+    const [vocabArr, setVocabArr] = useState<string[]>([]);
     const [text, setText] = useState('')
     
     const kuromoji = require('kuromoji');
@@ -71,24 +71,25 @@ export default function Page() {
     }, [currentNote])
 
     const refresh = async () => {
-        const s = new Set()
+        const s = new Set<string>()
         console.log(`note:${currentNote} AND deck:${currentDeck}`)
         const cardIDs = await invoke('findCards', 6, { query: `"note:${currentNote}" AND "deck:${currentDeck}"` });
         setCardArr(cardIDs);
         const data = await invoke('cardsInfo', 6, { cards: cardIDs });
         console.log(currentField)
-        kuromoji.builder({ dicPath: "/dict" }).build(function (err, tokenizer) {
+        kuromoji.builder({ dicPath: "/dict" }).build(function (_err: any, tokenizer: any) {
             
             
-            data.map((x, index) => {
-                
+            data.forEach((x:any) => {
+                console.log(x)
                 const sentence = x["fields"][currentField]["value"]
                 var tokens = tokenizer.tokenize(sentence);
-                tokens.map((token, index) => s.add(token['basic_form']))
+                tokens.forEach((token: any) => s.add(token['basic_form']))
             })
             console.log(s.size);
             setVocabSize(s.size);
             setVocabArr(Array.from(s))
+
 
             console.log(vocabArr)
 
@@ -98,10 +99,10 @@ export default function Page() {
     }
 
     const compare = async () => {
-        const s2= new Set();
-        kuromoji.builder({ dicPath: "/dict" }).build(function (err, tokenizer) {
+        const s2= new Set<string>();
+        kuromoji.builder({ dicPath: "/dict" }).build(function (_err: any, tokenizer: any) {
             var tokens = tokenizer.tokenize(text);
-            tokens.map((token, index) => s2.add(token['basic_form']))
+            tokens.forEach((token: any) => s2.add(token['basic_form']))
         console.log(s)
         console.log(tokenizer.tokenize("私"))
         console.log(s2)
@@ -135,7 +136,7 @@ export default function Page() {
               <label>Select a deck: </label>
 
             <select className="block text-black" onChange={e => {setCurrentDeck(e.target.value); console.log(e.target.value)}}>
-                {deckNames.map((deck, index) => (<option className="text-black" value={deck}>
+                {deckNames.map((deck, _index) => (<option className="text-black" value={deck}>
                     {deck}
                     </option>))}
             </select>
@@ -144,7 +145,7 @@ export default function Page() {
               <label>Select a note type: </label>
 
             <select className="block text-black" onChange={e => {setCurrentNote(e.target.value); console.log(e.target.value)}}>
-                {noteTypes.map((noteType, index) => (<option className="text-black" value={noteType}>
+                {noteTypes.map((noteType, _index) => (<option className="text-black" value={noteType}>
                     {noteType}
                     </option>))}
             </select>
@@ -153,7 +154,7 @@ export default function Page() {
               <label>Sentence field: </label>
 
             <select className="block text-black" onChange={e => {setCurrentField(e.target.value); console.log(e.target.value)}}>
-                {fields.map((field, index) => (<option className="text-black" value={field}>
+                {fields.map((field, _index) => (<option className="text-black" value={field}>
                     {field}
                     </option>))}
             </select>
