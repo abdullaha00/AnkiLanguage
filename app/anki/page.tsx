@@ -187,7 +187,7 @@ export default function Page() {
             <div className="flex justify-center items-center ">
                 <div className="w-64 h-64 bg-transparent border-4 border-white rounded-full flex flex-col justify-center items-center space-y-2">
                     <span className="text-white font-bold">{cardArr.length} cards found!</span> 
-                    <span className="text-white font-bold">{cardArr.length} cards found!</span> 
+                    <span className="text-white font-bold">{vocabSize} words known!</span> 
                 </div>
     </div>
         </div>
