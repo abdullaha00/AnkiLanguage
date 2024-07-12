@@ -159,11 +159,11 @@ export default function Page() {
                 <div>
                 <label>Sentence field: </label>
 
-                <select className="block text-black my-2" onChange={e => {setCurrentField(e.target.value); console.log(e.target.value)}}>
+                {/* <select className="block text-black my-2" onChange={e => {setCurrentField(e.target.value); console.log(e.target.value)}}>
                     {fields.map((field) => (<option key={field} className="text-black" value={field}>
                         {field}
                         </option>))}
-                </select>
+                </select> */}
 
                 <Combobox searchable={false} clearable={false} placeholder="Select a note type..." radius="base" size="sm" withRing={false} initialValue="1" style={{ width: '320px' }} onChange={(value: string) => setCurrentField(value)}>
                     {fields.map((note) => (<Combobox.Option key={note} value={note} label={note}>
