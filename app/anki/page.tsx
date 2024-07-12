@@ -174,12 +174,12 @@ export default function Page() {
                 </div>
                 
                 <div>
-                <Button color="base" shadow="base" radius="sm" size="sm" className="my-2" onClick={refresh} loading={!refb}>REFRESH</Button>
+                <Button color="black" shadow="base" radius="sm" size="sm" className="my-2 border-2 border-white" onClick={refresh} loading={!refb}>REFRESH</Button>
         
                 </div>
 
                 <div>
-                <Button color="base" shadow="base" radius="sm" size="sm" className="my-2" onClick={compare} disabled={!!!vocabSize}>COMPARE WITH  TEXT</Button>
+                <Button color="black" shadow="base" radius="sm" size="sm" className="my-2 border-2 border-white" onClick={compare} disabled={!!!vocabSize}>COMPARE WITH  TEXT</Button>
                 <input className="block w-max h-max text-black" onChange={e => setText(e.target.value)}></input>
                     <p>{knownWordCount} out of {totalWordCount} words known! ({Math.round(knownWordCount/totalWordCount * 100)}%)</p>
                 </div>
