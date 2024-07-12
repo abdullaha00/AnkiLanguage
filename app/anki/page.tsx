@@ -175,8 +175,7 @@ export default function Page() {
                 
                 <div>
                 <Button color="base" shadow="base" radius="sm" size="sm" className="my-2" onClick={refresh} loading={!refb}>REFRESH</Button>
-                    <p>{cardArr.length} cards found!</p>
-                    <p>{vocabSize} words known!</p>
+        
                 </div>
 
                 <div>
