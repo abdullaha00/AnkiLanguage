@@ -1,8 +1,9 @@
 'use client'
 import {tokenize, getTokenizer} from "kuromojin";
-
+import { Button } from '@rewind-ui/core';
 import { isAnkiConnectRunning, invoke } from "../utils/ankiConnect";
 import { useState, useEffect } from 'react'
+import { Combobox } from '@rewind-ui/core';
 
 export default function Page() {
 
@@ -18,6 +19,7 @@ export default function Page() {
     const [knownWordCount, setKnownWordCount] = useState(0);
     const [totalWordCount, setTotalWordCount] = useState(0);
     const [vocabArr, setVocabArr] = useState<string[]>([]);
+    const [refb, SetRefB] = useState(true) 
     const [text, setText] = useState('')
     
     const kuromoji = require('kuromoji');
@@ -71,6 +73,7 @@ export default function Page() {
     }, [currentNote])
 
     const refresh = async () => {
+        SetRefB(false)
         const s = new Set<string>()
         console.log(`note:${currentNote} AND deck:${currentDeck}`)
         const cardIDs = await invoke('findCards', 6, { query: `"note:${currentNote}" AND "deck:${currentDeck}"` });
@@ -92,6 +95,7 @@ export default function Page() {
 
 
             console.log(vocabArr)
+            SetRefB(true)
 
         });
      
@@ -130,47 +134,63 @@ export default function Page() {
 
     return ( 
         
-        <div className="mx-20">
+        <div className="flex justify-between items-center h-screen">
+        <div >
             {isRunning ? <i>Ankiconnect found! </i> : <i>Waiting for AnkiConnect...</i>}
+
               <div>
               <label>Select a deck: </label>
+              <Combobox searchable={false} clearable={false} placeholder="Select a note type..." radius="base" size="sm" withRing={false} initialValue="1" style={{ width: '320px' }} onChange={(value: string) => setCurrentDeck(value)}>
+                {deckNames.map((deck, index) => (<Combobox.Option value={deck} label={deck}>
+                    </Combobox.Option>))}
+            </Combobox>
+      
+     
+                </div>
+                <div>
+                <label>Select a note type: </label>
 
-            <select className="block text-black" onChange={e => {setCurrentDeck(e.target.value); console.log(e.target.value)}}>
-                {deckNames.map((deck, index) => (<option key={index} className="text-black" value={deck}>
-                    {deck}
-                    </option>))}
-            </select>
-              </div>
-              <div>
-              <label>Select a note type: </label>
+                <Combobox searchable={false} clearable={false} placeholder="Select a note type..." radius="base" size="sm" withRing={false} initialValue="1" style={{ width: '320px' }} onChange={(value: string) => setCurrentNote(value)}>
+                    {noteTypes.map((note) => (<Combobox.Option value={note} label={note}>
+                        </Combobox.Option>))}
+                </Combobox>
+        
+                </div> 
+                <div>
+                <label>Sentence field: </label>
 
-            <select className="block text-black" onChange={e => {setCurrentNote(e.target.value); console.log(e.target.value)}}>
-                {noteTypes.map((noteType, index) => (<option key={index} className="text-black" value={noteType}>
-                    {noteType}
-                    </option>))}
-            </select>
-              </div> 
-              <div>
-              <label>Sentence field: </label>
+                <select className="block text-black my-2" onChange={e => {setCurrentField(e.target.value); console.log(e.target.value)}}>
+                    {fields.map((field, index) => (<option key={index} className="text-black" value={field}>
+                        {field}
+                        </option>))}
+                </select>
 
-            <select className="block text-black" onChange={e => {setCurrentField(e.target.value); console.log(e.target.value)}}>
-                {fields.map((field, index) => (<option key={index} className="text-black" value={field}>
-                    {field}
-                    </option>))}
-            </select>
-              </div>
-            
-            <div>
-            <button onClick={refresh}>REFRESH</button>
-                <p>{cardArr.length} cards found!</p>
-                <p>{vocabSize} words known!</p>
+                <Combobox searchable={false} clearable={false} placeholder="Select a note type..." radius="base" size="sm" withRing={false} initialValue="1" style={{ width: '320px' }} onChange={(value: string) => setCurrentField(value)}>
+                    {fields.map((note) => (<Combobox.Option value={note} label={note}>
+                        </Combobox.Option>))}
+                </Combobox>
+
+        
+                </div>
+                
+                <div>
+                <Button color="base" shadow="base" radius="sm" size="sm" className="my-2" onClick={refresh} loading={!refb}>REFRESH</Button>
+                    <p>{cardArr.length} cards found!</p>
+                    <p>{vocabSize} words known!</p>
+                </div>
+
+                <div>
+                <Button color="base" shadow="base" radius="sm" size="sm" className="my-2" onClick={compare} disabled={!!!vocabSize}>COMPARE WITH  TEXT</Button>
+                <input className="block w-max h-max text-black" onChange={e => setText(e.target.value)}></input>
+                    <p>{knownWordCount} out of {totalWordCount} words known! ({Math.round(knownWordCount/totalWordCount * 100)}%)</p>
+                </div>
             </div>
-
-            <div>
-            <button onClick={compare}>COMPARE WITH  TEXT</button>
-            <input className="block w-max h-max text-black" onChange={e => setText(e.target.value)}></input>
-                <p>{knownWordCount} out of {totalWordCount} words known! ({Math.round(knownWordCount/totalWordCount * 100)}%)</p>
-            </div>
+            <div className="flex justify-center items-center ">
+                <div className="w-64 h-64 bg-transparent border-4 border-white rounded-full flex flex-col justify-center items-center space-y-2">
+                    <span className="text-white font-bold">{cardArr.length} cards found!</span> 
+                    <span className="text-white font-bold">{cardArr.length} cards found!</span> 
+                </div>
+    </div>
         </div>
         
     );
