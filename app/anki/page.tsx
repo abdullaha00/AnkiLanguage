@@ -141,7 +141,7 @@ export default function Page() {
               <div>
               <label>Select a deck: </label>
               <Combobox searchable={false} clearable={false} placeholder="Select a note type..." radius="base" size="sm" withRing={false} initialValue="1" style={{ width: '320px' }} onChange={(value: string) => setCurrentDeck(value)}>
-                {deckNames.map((deck, index) => (<Combobox.Option value={deck} label={deck}>
+                {deckNames.map((deck) => (<Combobox.Option key= {deck} value={deck} label={deck}>
                     </Combobox.Option>))}
             </Combobox>
       
@@ -151,7 +151,7 @@ export default function Page() {
                 <label>Select a note type: </label>
 
                 <Combobox searchable={false} clearable={false} placeholder="Select a note type..." radius="base" size="sm" withRing={false} initialValue="1" style={{ width: '320px' }} onChange={(value: string) => setCurrentNote(value)}>
-                    {noteTypes.map((note) => (<Combobox.Option value={note} label={note}>
+                    {noteTypes.map((note) => (<Combobox.Option key= {note} value={note} label={note}>
                         </Combobox.Option>))}
                 </Combobox>
         
@@ -160,13 +160,13 @@ export default function Page() {
                 <label>Sentence field: </label>
 
                 <select className="block text-black my-2" onChange={e => {setCurrentField(e.target.value); console.log(e.target.value)}}>
-                    {fields.map((field, index) => (<option key={index} className="text-black" value={field}>
+                    {fields.map((field) => (<option key={field} className="text-black" value={field}>
                         {field}
                         </option>))}
                 </select>
 
                 <Combobox searchable={false} clearable={false} placeholder="Select a note type..." radius="base" size="sm" withRing={false} initialValue="1" style={{ width: '320px' }} onChange={(value: string) => setCurrentField(value)}>
-                    {fields.map((note) => (<Combobox.Option value={note} label={note}>
+                    {fields.map((note) => (<Combobox.Option key={note} value={note} label={note}>
                         </Combobox.Option>))}
                 </Combobox>
 
