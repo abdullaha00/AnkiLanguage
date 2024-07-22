@@ -482,14 +482,14 @@ export default function Page() {
       <Table>
       <Table.Thead>
         <Table.Tr>
-          <Table.Th >Word</Table.Th>
+          <Table.Th>Word</Table.Th>
           <Table.Th>Count</Table.Th>
         </Table.Tr>
       </Table.Thead>
       <Table.Tbody>
 
-        {unknownWordCounts.map((p) => (
-            <Table.Tr>
+        {unknownWordCounts.map((p, index) => (
+            <Table.Tr key={index}>
                         <Table.Td>{p[0]}</Table.Td>
                         <Table.Td align="center">{p[1]}</Table.Td>
             </Table.Tr>
