@@ -8,22 +8,18 @@ import { Carrois_Gothic_SC } from "next/font/google";
 import { Modal, Table } from '@rewind-ui/core';
 
 export default function Page() {
-  const wordstorage = 0; //localStorage.getItem('wordCount')
-  const deckstorage = localStorage.getItem("deck") ?? '';
-  const notestorage = localStorage.getItem("note") ?? '';
-  const fieldstorage = localStorage.getItem("field") ?? '';
-  const cardcount = 0; //localStorage.getItem('cardCount')
+ 
 
   const [isRunning, setRunning] = useState(false);
   const [deckArray, setDeckArray] = useState([]);
-  const [currentDeck, setCurrentDeck] = useState(deckstorage);
+  const [currentDeck, setCurrentDeck] = useState('');
   const [noteArray, setNoteArray] = useState([]);
-  const [currentNote, setCurrentNote] = useState(notestorage);
+  const [currentNote, setCurrentNote] = useState('');
   const [fieldArray, setFieldArray] = useState([]);
-  const [currentField, setCurrentField] = useState(fieldstorage);
+  const [currentField, setCurrentField] = useState('');
   const [cardArr, setCardArr] = useState([]);
-  const [cardCount, setCardCount] = useState(cardcount);
-  const [vocabSize, setVocabSize] = useState(wordstorage);
+  const [cardCount, setCardCount] = useState(0);
+  const [vocabSize, setVocabSize] = useState(0);
   
   const [vocabArr, setVocabArr] = useState<string[]>([]);
   const [refb, SetRefB] = useState(true);
@@ -47,6 +43,24 @@ export default function Page() {
  const [open, setOpen] = useState(false);
 
   const kuromoji = require("kuromoji");
+
+
+  useEffect(() => { 
+    
+    if (typeof window !== "undefined") {
+    const wordstorage = 0; //localStorage.getItem('wordCount')
+    setVocabSize(wordstorage);
+    const deckstorage = localStorage.getItem("deck") ?? '';
+    setCurrentDeck(deckstorage);
+    const notestorage = localStorage.getItem("note") ?? '';
+    setCurrentNote(notestorage);
+    const fieldstorage = localStorage.getItem("field") ?? '';
+    setCurrentField(fieldstorage);
+    const cardcount = 0; //localStorage.getItem('cardCount')});
+    setCardCount(cardcount)
+    }
+  })
+
 
   useEffect(() => {
     console.log("current deck set to:" + currentDeck);
@@ -349,7 +363,7 @@ export default function Page() {
               radius="base"
               size="sm"
               withRing={false}
-              initialValue={notestorage}
+              initialValue={currentNote}
               style={{ width: "320px" }}
               onChange={(value: string) => {
                 if (value) setCurrentNote(value);
@@ -385,7 +399,7 @@ export default function Page() {
               radius="base"
               size="sm"
               withRing={false}
-              initialValue={fieldstorage}
+              initialValue={currentField}
               style={{ width: "320px" }}
               onChange={(value: string) => {
                 if (value) setCurrentField(value);
@@ -409,7 +423,7 @@ export default function Page() {
               radius="base"
               size="sm"
               withRing={false}
-              initialValue={deckstorage}
+              initialValue={currentDeck}
               style={{ width: "320px" }}
             />
           )}
