@@ -5,7 +5,7 @@ import ReactCrop, { type Crop } from "react-image-crop";
 import "react-image-crop/dist/ReactCrop.css";
 import Tesseract from "tesseract.js";
 
-export default function ocr() {
+export default function Ocr() {
   const [imgURL, setImgURL] = useState("");
   const [text, setText] = useState("");
   const [crop, setCrop] = useState<Crop>();
