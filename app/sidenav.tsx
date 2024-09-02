@@ -1,6 +1,7 @@
 
 import { GiCardPick } from "react-icons/gi";
 import { TbLanguageKatakana } from "react-icons/tb";
+import { GrScan } from "react-icons/gr";
 
 import Link from "next/link";
 
@@ -9,12 +10,13 @@ export default function SideNav() {
     type sidenavEntryProps = {
 
         icon: JSX.Element;
+        link: string;
 
     }
 
-    const SidenavEntry = ({ icon } : sidenavEntryProps) => {
+    const SidenavEntry = ({ icon, link } : sidenavEntryProps) => {
         return (
-            <Link href="/anki" className="sidenavEntry">
+            <Link href={link} className="sidenavEntry">
                 {icon}
             </Link>)
     };
@@ -31,8 +33,8 @@ export default function SideNav() {
         >
             <TbLanguageKatakana size="48"/>
 
-            <SidenavEntry icon={<GiCardPick size="48"/>} />
-
+            <SidenavEntry icon={<GiCardPick size="48"/>} link="/anki" />
+            <SidenavEntry icon={<GrScan size="48"/>} link="/ocr"/>
 
         </div>
 
