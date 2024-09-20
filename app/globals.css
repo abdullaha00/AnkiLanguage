@@ -40,7 +40,7 @@ body {
       @apply relative flex items-center justify-center
              h-16 w-24 mx-auto my-20
              bg-gray-600
-             hover:bg-green-500;
+             hover:bg-slate-500;
     }
 
 }
