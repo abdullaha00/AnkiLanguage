@@ -5,28 +5,28 @@ import { isAnkiConnectRunning, invoke } from "../utils/ankiConnect";
 import { useState, useEffect } from "react";
 import { Combobox, Input } from "@rewind-ui/core";
 import { Carrois_Gothic_SC } from "next/font/google";
-import { Modal, Table } from '@rewind-ui/core';
-
+import { Modal, Table } from "@rewind-ui/core";
+import DeckSelector from "./components/DeckSelector";
 
 export default function Page() {
- 
-
   const [isRunning, setRunning] = useState(false);
   const [deckArray, setDeckArray] = useState([]);
-  const [currentDeck, setCurrentDeck] = useState('');
+  const [currentDeck, setCurrentDeck] = useState("");
   const [noteArray, setNoteArray] = useState([]);
-  const [currentNote, setCurrentNote] = useState('');
+  const [currentNote, setCurrentNote] = useState("");
   const [fieldArray, setFieldArray] = useState([]);
-  const [currentField, setCurrentField] = useState('');
+  const [currentField, setCurrentField] = useState("");
   const [cardArr, setCardArr] = useState([]);
   const [cardCount, setCardCount] = useState(0);
   const [vocabSize, setVocabSize] = useState(0);
-  
+
   const [vocabArr, setVocabArr] = useState<string[]>([]);
   const [refb, SetRefB] = useState(true);
   const [text, setText] = useState("");
 
-  const [unknownWordCounts, setUnknownWordCounts] = useState<[string,number][]>([]);
+  const [unknownWordCounts, setUnknownWordCounts] = useState<
+    [string, number][]
+  >([]);
 
   const [knownWordsFilesU, setKnownWordsFilesU] = useState(0);
   const [totalWordsFilesU, setTotalWordsFilesU] = useState(0);
@@ -40,28 +40,29 @@ export default function Page() {
   const [knownWordsText, setKnownWordsText] = useState(0);
   const [totalWordsText, setTotalWordsText] = useState(0);
 
+  const [loading, setLoading] = useState(true);
 
- const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(false);
 
   const kuromoji = require("kuromoji");
 
-
-  useEffect(() => { 
-    
+  useEffect(() => {
     if (typeof window !== "undefined") {
-    const wordstorage = 0; //localStorage.getItem('wordCount')
-    setVocabSize(wordstorage);
-    const deckstorage = localStorage.getItem("deck") ?? '';
-    setCurrentDeck(deckstorage);
-    const notestorage = localStorage.getItem("note") ?? '';
-    setCurrentNote(notestorage);
-    const fieldstorage = localStorage.getItem("field") ?? '';
-    setCurrentField(fieldstorage);
-    const cardcount = 0; //localStorage.getItem('cardCount')});
-    setCardCount(cardcount)
-    }
-  })
+      const wordstorage = 0; //localStorage.getItem('wordCount')
+      setVocabSize(wordstorage);
+      const deckstorage = localStorage.getItem("deck") ?? "";
+      setCurrentDeck(deckstorage);
+      console.log(`current deck set to [${currentDeck}] after localstorage`);
+      const notestorage = localStorage.getItem("note") ?? "";
+      setCurrentNote(notestorage);
+      const fieldstorage = localStorage.getItem("field") ?? "";
+      setCurrentField(fieldstorage);
+      const cardcount = 0; //localStorage.getItem('cardCount')});
+      setCardCount(cardcount);
 
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
     console.log("current deck set to:" + currentDeck);
@@ -98,7 +99,6 @@ export default function Page() {
       fetchNoteTypes();
     }
 
-    
     const deckstorage = localStorage.getItem("deck") || "";
     const notestorage = localStorage.getItem("note") || "";
     const fieldstorage = localStorage.getItem("field") || "";
@@ -141,13 +141,11 @@ export default function Page() {
         console.log(vocabArr);
         SetRefB(true);
 
-       //  localStorage.setItem("wordCount", vocabSize);
+        //  localStorage.setItem("wordCount", vocabSize);
         localStorage.setItem("deck", currentDeck);
         localStorage.setItem("note", currentNote);
         localStorage.setItem("field", currentField);
         // localStorage.setItem("cardCount", cardCount);
-
-        console.log(tokenizer.tokenize("だ"));
       });
   };
 
@@ -160,61 +158,57 @@ export default function Page() {
       .build(function (_err: any, tokenizer: any) {
         var tokens = tokenizer.tokenize(text);
         tokens.forEach((token: any) => {
-            if (
-              token["word_type"] == "KNOWN" &&
-              token["pos_detail_2"] != "人名" &&
-              token["pos"] != "記号" &&
-              token["pos"] != "一般"
-            ) {
-              s2.add(token["basic_form"]);
-              textArray.push(token["basic_form"]);
+          if (
+            token["word_type"] == "KNOWN" &&
+            token["pos_detail_2"] != "人名" &&
+            token["pos"] != "記号" &&
+            token["pos"] != "一般"
+          ) {
+            s2.add(token["basic_form"]);
+            textArray.push(token["basic_form"]);
 
-              if (token["basic_form"] == "後藤") console.log(token);
-            }
-          });
+            if (token["basic_form"] == "後藤") console.log(token);
+          }
+        });
 
+        const s3 = new Set();
+        const intersectionArray = new Array();
 
-          const s3 = new Set();
-          const intersectionArray = new Array();
-  
-          const countU: { [key: string]: number } = {};
+        const countU: { [key: string]: number } = {};
 
         for (let w of vocabArr) {
           if (s2.has(w)) {
             s3.add(w);
           }
         }
-        let x=0;
-        
+        let x = 0;
+
         for (let w of textArray) {
-            if (vocabArr.includes(w)) {
-              x++;
+          if (vocabArr.includes(w)) {
+            x++;
+          } else {
+            if (countU[w]) {
+              countU[w]++;
             } else {
-              if (countU[w]) {
-                countU[w]++;
-              } else {
-                countU[w] = 1;
-              }
+              countU[w] = 1;
             }
           }
-  
-          const countUA = Object.entries(countU);
-          countUA.sort((a, b) => a[1] - b[1]).reverse();
-          setUnknownWordCounts(countUA);
-  
-          console.log(s2);
-          console.log(s2);
-          console.log(countU);
-          setTotalWordsTextU(s2.size);
-          setKnownWordsTextU(s3.size);
-          setTotalWordsText(textArray.length);
-          setKnownWordsText(x);
-          console.log(textArray);
-          console.log(countUA);
+        }
+
+        const countUA = Object.entries(countU);
+        countUA.sort((a, b) => a[1] - b[1]).reverse();
+        setUnknownWordCounts(countUA);
+
+        console.log(s2);
+        console.log(s2);
+        console.log(countU);
+        setTotalWordsTextU(s2.size);
+        setKnownWordsTextU(s3.size);
+        setTotalWordsText(textArray.length);
+        setKnownWordsText(x);
+        console.log(textArray);
+        console.log(countUA);
       });
-
-
-      
   };
 
   const processFiles = async (f: React.ChangeEvent<HTMLInputElement>) => {
@@ -228,7 +222,7 @@ export default function Page() {
             const reader = new FileReader();
 
             reader.onload = (e) => {
-              var tokens = tokenizer.tokenize(e.target ? e.target.result : '');
+              var tokens = tokenizer.tokenize(e.target ? e.target.result : "");
               console.log(tokens);
               tokens.forEach((token: any) => {
                 if (
@@ -250,7 +244,6 @@ export default function Page() {
             reader.readAsText(file);
           });
         };
-
 
         const a = Array.from((f.target as HTMLInputElement).files ?? []);
 
@@ -306,53 +299,20 @@ export default function Page() {
   return (
     <div className="flex justify-between items-center h-screen">
       <div>
-
-
-
         {isRunning ? (
           <i>Ankiconnect found! </i>
         ) : (
           <i>Waiting for AnkiConnect...</i>
         )}
 
-        <div>
-          <label>Select a deck: </label>
-          {isRunning ? (
-            <Combobox
-              searchable={false}
-              clearable={false}
-              placeholder="Select a deck type..."
-              radius="base"
-              size="sm"
-              withRing={false}
-              initialValue={currentDeck}
-              style={{ width: "320px" }}
-              onChange={(value: string) => {
-                if (value) setCurrentDeck(value);
-              }}
-            >
-              {deckArray.map((deck) => (
-                <Combobox.Option
-                  key={deck}
-                  value={deck}
-                  label={deck}
-                ></Combobox.Option>
-              ))}
-            </Combobox>
-          ) : (
-            <Combobox
-              key="d"
-              disabled={true}
-              searchable={false}
-              clearable={false}
-              placeholder="Select a deck type..."
-              radius="base"
-              size="sm"
-              withRing={false}
-              style={{ width: "320px" }}
-            />
-          )}
-        </div>
+        {!loading && (
+          <DeckSelector
+            isRunning={isRunning}
+            onDeckChange={setCurrentDeck}
+            deckArray={deckArray}
+            currentDeck={currentDeck}
+          />
+        )}
         <div>
           <label>Select a note type: </label>
 
@@ -460,7 +420,7 @@ export default function Page() {
             className="block w-max h-max text-black"
             onChange={(e) => setText(e.target.value)}
           ></input>
-       <p>
+          <p>
             {knownWordsTextU} out of {totalWordsTextU} unique words known! (
             {Math.round((knownWordsTextU / totalWordsTextU) * 100)}%)
           </p>
@@ -483,51 +443,54 @@ export default function Page() {
             {knownWordsFiles} out of {totalWordsFiles} words known! (
             {Math.round((knownWordsFiles / totalWordsFiles) * 100)}%)
           </p>
-          
         </div>
       </div>
       <div className="flex justify-center items-center flex-col">
-      <div className="flex justify-center items-center flex-col">
-        <div className="w-64 h-64 bg-transparent border-4 border-white rounded-full flex flex-col justify-center items-center space-y-2">
-          <span className="text-white font-bold">{cardCount} cards found!</span>
-          <span className="text-white font-bold">{vocabSize} words known!</span>
+        <div className="flex justify-center items-center flex-col">
+          <div className="w-64 h-64 bg-transparent border-4 border-white rounded-full flex flex-col justify-center items-center space-y-2">
+            <span className="text-white font-bold">
+              {cardCount} cards found!
+            </span>
+            <span className="text-white font-bold">
+              {vocabSize} words known!
+            </span>
+          </div>
+          <>
+            <Modal size="md" open={open} onClose={() => setOpen(false)}>
+              <Table>
+                <Table.Thead>
+                  <Table.Tr>
+                    <Table.Th>Word</Table.Th>
+                    <Table.Th>Count</Table.Th>
+                  </Table.Tr>
+                </Table.Thead>
+                <Table.Tbody>
+                  {unknownWordCounts.map((p, index) => (
+                    <Table.Tr key={index}>
+                      <Table.Td>{p[0]}</Table.Td>
+                      <Table.Td align="center">{p[1]}</Table.Td>
+                    </Table.Tr>
+                  ))}
+                </Table.Tbody>
+                <Table.Tfoot></Table.Tfoot>
+              </Table>
+            </Modal>
+
+            <Button
+              color="black"
+              shadow="base"
+              radius="sm"
+              size="sm"
+              className="my-2 border-2 border-white mt-6"
+              onClick={() => setOpen(true)}
+            >
+              Open text frequency list
+            </Button>
+          </>
         </div>
-        <>
-      <Modal size="md" open={open} onClose={() => setOpen(false)}>
-      <Table>
-      <Table.Thead>
-        <Table.Tr>
-          <Table.Th>Word</Table.Th>
-          <Table.Th>Count</Table.Th>
-        </Table.Tr>
-      </Table.Thead>
-      <Table.Tbody>
 
-        {unknownWordCounts.map((p, index) => (
-            <Table.Tr key={index}>
-                        <Table.Td>{p[0]}</Table.Td>
-                        <Table.Td align="center">{p[1]}</Table.Td>
-            </Table.Tr>
-          ))}
-      </Table.Tbody>
-      <Table.Tfoot>
-
-        
-      </Table.Tfoot>
-    </Table>
-      </Modal>
-
-      <Button         color="black"
-            shadow="base"
-            radius="sm"
-            size="sm"
-            className="my-2 border-2 border-white mt-6" onClick={() => setOpen(true)}>Open text frequency list</Button>
-    </>
-    </div>
-
-        <div>
-        </div>
-         </div>
+        <div></div>
+      </div>
     </div>
   );
 }

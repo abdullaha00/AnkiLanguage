@@ -11,7 +11,6 @@ export async function isAnkiConnectRunning() {
     }
 
 
-
 }
 
 
@@ -40,6 +39,6 @@ export function invoke(action: string, version: number, params = {}) {
         return response.result;
     })
     .catch(error => {
-        throw new Error(error.message || 'failed to issue request');
+        //throw new Error(error.message || 'failed to issue request');
     });
 }
