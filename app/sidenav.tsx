@@ -30,7 +30,7 @@ export default function SideNav() {
                         bg-gray-900 text-white shadow-lg space-y-10"
         >
             <TbLanguageKatakana size="48"/>
-            <div className="flex-col my-0">
+            <div className="flex-col items-center ">
             <SidenavEntry icon={<GiCardPick size="48"/>} link="/anki" />
             <SidenavEntry icon={<GrScan size="48"/>} link="/ocr"/>
             </div>

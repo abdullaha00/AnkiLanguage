@@ -104,13 +104,13 @@ export default function Ocr() {
 
           {imgURL ?           <img
             ref={handleImgRef}
-            className="w-[90vh] h-auto max-h-full object-cover"
+            className="max-h-[75vh] h-auto  object-cover"
             src={
               imgURL
             }
           ></img>
         
-            : <p>Ctrl + v</p>
+            : <p>OCR page: ctrl+v an image, and crop to select text!</p>
         }
 
         </ReactCrop>

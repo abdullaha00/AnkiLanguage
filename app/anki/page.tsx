@@ -1,12 +1,13 @@
 "use client";
 import { tokenize, getTokenizer } from "kuromojin";
-import { Button } from "@rewind-ui/core";
+import { Button, Tooltip } from "@rewind-ui/core";
 import { isAnkiConnectRunning, invoke } from "../utils/ankiConnect";
 import { useState, useEffect } from "react";
 import { Combobox, Input } from "@rewind-ui/core";
 import { Carrois_Gothic_SC } from "next/font/google";
 import { Modal, Table } from "@rewind-ui/core";
 import DeckSelector from "./components/DeckSelector";
+import HelpTooltip from "./components/HelpTooltip";
 
 export default function Page() {
   const [isRunning, setRunning] = useState(false);
@@ -24,9 +25,7 @@ export default function Page() {
   const [refb, SetRefB] = useState(true);
   const [text, setText] = useState("");
 
-  const [unknownWordCounts, setUnknownWordCounts] = useState<
-    [string, number][]
-  >([]);
+  const [unknownWordCounts, setUnknownWordCounts] = useState<[string, number][]  >([]);
 
   const [knownWordsFilesU, setKnownWordsFilesU] = useState(0);
   const [totalWordsFilesU, setTotalWordsFilesU] = useState(0);
@@ -40,34 +39,16 @@ export default function Page() {
   const [knownWordsText, setKnownWordsText] = useState(0);
   const [totalWordsText, setTotalWordsText] = useState(0);
 
-  const [loading, setLoading] = useState(true);
-
   const [open, setOpen] = useState(false);
 
   const kuromoji = require("kuromoji");
 
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const wordstorage = 0; //localStorage.getItem('wordCount')
-      setVocabSize(wordstorage);
-      const deckstorage = localStorage.getItem("deck") ?? "";
-      setCurrentDeck(deckstorage);
-      console.log(`current deck set to [${currentDeck}] after localstorage`);
-      const notestorage = localStorage.getItem("note") ?? "";
-      setCurrentNote(notestorage);
-      const fieldstorage = localStorage.getItem("field") ?? "";
-      setCurrentField(fieldstorage);
-      const cardcount = 0; //localStorage.getItem('cardCount')});
-      setCardCount(cardcount);
-
-      setLoading(false);
-    }
-  }, []);
-
+  // debugging
   useEffect(() => {
     console.log("current deck set to:" + currentDeck);
   }, [currentDeck]);
 
+ 
   const s = new Set();
 
   const check = async () => {
@@ -79,17 +60,38 @@ export default function Page() {
     setInterval(check, 3000);
   }, []);
 
+
+  // execute when AnkiConnect found
   useEffect(() => {
     if (isRunning) {
+
+      // pull deck, note, field
+      const deckstorage = localStorage.getItem("deck");
+      if (deckstorage) 
+        { setCurrentDeck(deckstorage);
+          console.log(`pulled value ${deckstorage} from localstorage, updating deck!`);
+          } 
+
+      const notestorage = localStorage.getItem("note") ?? "";
+      setCurrentNote(notestorage);
+      console.log(`current note set to [${notestorage}] after localstorage pull`);
+
+      const fieldstorage = localStorage.getItem("field") ?? "";
+      setCurrentField(fieldstorage);
+      console.log(`current field set to [${notestorage}] after localstorage pull`);
+      
+      // auto-refresh if all 3 included
+      if (deckstorage && notestorage && fieldstorage) {
+        //refresh(); 
+      }
+
+      // get list of deck name
       const fetchDeckNames = async () => {
         const v = await invoke("deckNames", 6);
         setDeckArray(v);
-
-        if (deckstorage && notestorage && fieldstorage) {
-          refresh();
-        }
       };
 
+      // get list of note types
       const fetchNoteTypes = async () => {
         const v = await invoke("modelNames", 6);
         setNoteArray(v);
@@ -98,57 +100,57 @@ export default function Page() {
       fetchDeckNames();
       fetchNoteTypes();
     }
-
-    const deckstorage = localStorage.getItem("deck") || "";
-    const notestorage = localStorage.getItem("note") || "";
-    const fieldstorage = localStorage.getItem("field") || "";
   }, [isRunning]);
 
+
+  // currentNote changes -> refresh the sentence fields
   useEffect(() => {
     const fetchFields = async () => {
       const v = await invoke("modelFieldNames", 6, { modelName: currentNote });
-      setFieldArray(v);
-      console.log(v);
+      if (v) setFieldArray(v);
     };
 
     fetchFields();
   }, [currentNote]);
 
+  // 
   const refresh = async () => {
     SetRefB(false);
     const s = new Set<string>();
-    console.log(`note:${currentNote} AND deck:${currentDeck}`);
+    //console.log(`note:${currentNote} AND deck:${currentDeck}`);
     const cardIDs = await invoke("findCards", 6, {
       query: `"note:${currentNote}" AND "deck:${currentDeck}"`,
     });
     setCardArr(cardIDs);
     setCardCount(cardIDs.length);
     const data = await invoke("cardsInfo", 6, { cards: cardIDs });
-    console.log(currentField);
+   // console.log(currentField);
     kuromoji
       .builder({ dicPath: "/dict" })
       .build(function (_err: any, tokenizer: any) {
         data.forEach((x: any) => {
-          console.log(x);
+          //console.log(x);
           const sentence = x["fields"][currentField]["value"];
           var tokens = tokenizer.tokenize(sentence);
           tokens.forEach((token: any) => s.add(token["basic_form"]));
         });
-        console.log(s.size);
+       // console.log(s.size);
         setVocabSize(s.size);
         setVocabArr(Array.from(s));
 
-        console.log(vocabArr);
+       // console.log(vocabArr);
         SetRefB(true);
 
-        //  localStorage.setItem("wordCount", vocabSize);
         localStorage.setItem("deck", currentDeck);
+        console.log(`Updating localstorage deck to: ${currentDeck}`)
         localStorage.setItem("note", currentNote);
         localStorage.setItem("field", currentField);
-        // localStorage.setItem("cardCount", cardCount);
+
       });
   };
 
+
+  
   const compare = async () => {
     const s2 = new Set();
     const textArray = new Array<string>();
@@ -299,13 +301,17 @@ export default function Page() {
   return (
     <div className="flex justify-between items-center h-screen">
       <div>
+        <div className="flex gap-2">
         {isRunning ? (
           <i>Ankiconnect found! </i>
         ) : (
           <i>Waiting for AnkiConnect...</i>
-        )}
+          
+        )}  <HelpTooltip/>      
+        </div>
 
-        {!loading && (
+
+        {(
           <DeckSelector
             isRunning={isRunning}
             onDeckChange={setCurrentDeck}
@@ -316,10 +322,11 @@ export default function Page() {
         <div>
           <label>Select a note type: </label>
 
-          {isRunning ? (
+          {(
             <Combobox
               searchable={false}
               clearable={false}
+              disabled={!isRunning}
               placeholder="Select a note type..."
               radius="base"
               size="sm"
@@ -338,22 +345,13 @@ export default function Page() {
                 ></Combobox.Option>
               ))}
             </Combobox>
-          ) : (
-            <Combobox
-              key="n"
-              disabled={true}
-              placeholder="Select a note type..."
-              radius="base"
-              size="sm"
-              style={{ width: "320px" }}
-            />
           )}
         </div>
         <div>
           <label>Sentence field: </label>
 
-          {isRunning ? (
             <Combobox
+              disabled={!isRunning}
               searchable={false}
               clearable={false}
               placeholder="Select a field type..."
@@ -374,20 +372,6 @@ export default function Page() {
                 ></Combobox.Option>
               ))}
             </Combobox>
-          ) : (
-            <Combobox
-              key="f"
-              disabled={true}
-              searchable={false}
-              clearable={false}
-              placeholder="Select a field type..."
-              radius="base"
-              size="sm"
-              withRing={false}
-              initialValue={currentDeck}
-              style={{ width: "320px" }}
-            />
-          )}
         </div>
 
         <div>
