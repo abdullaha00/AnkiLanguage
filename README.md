@@ -1,1 +1,4 @@
-Langauge learning app with next.js
+App to assist with language learning, utilising the AnkiConnect API.
+
+Anki Page example:
+![image](https://github.com/user-attachments/assets/8895f9b3-4ac5-43c8-9df0-0939c7fafc13)
