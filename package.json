@@ -36,7 +36,7 @@
     "@radix-ui/react-toggle": "^1.1.10",
     "@radix-ui/react-toggle-group": "^1.1.11",
     "@radix-ui/react-tooltip": "^1.2.8",
-    "@rewind-ui/core": "^0.19.11",
+    "@rewind-ui/core": "^0.20.0",
     "@sglkc/kuromoji": "^1.1.0",
     "@tailwindcss/forms": "^0.5.7",
     "@tailwindcss/typography": "^0.5.13",
