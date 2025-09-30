@@ -4,6 +4,7 @@ import { useState, useEffect, ImgHTMLAttributes } from "react";
 import ReactCrop, { type Crop } from "react-image-crop";
 import "react-image-crop/dist/ReactCrop.css";
 import Tesseract from "tesseract.js";
+import { Textarea } from "@/components/ui/textarea"
 
 export default function Ocr() {
   const [imgURL, setImgURL] = useState("");
@@ -55,7 +56,6 @@ export default function Ocr() {
       canvas.width = crop.width;
       canvas.height = crop.height;
 
-
       console.log(crop)
       console.log(canvas)
       console.log(scaleX)
@@ -89,9 +89,10 @@ export default function Ocr() {
   return (
     <div className="flex flex-col h-screen">
       <div
-        className="flex-1 flex items-center justify-center my-5"
+        className="flex-1 flex items-center justify-center my-5 "
         style={{ maxHeight: "75vh" }}
       >
+        <div className= {imgURL ? "border rounded-lg border-gray-100 h-[60image.pngvh] overflow-hidden" : ""}>
         <ReactCrop
           crop={crop}
           onChange={(c) => {
@@ -104,7 +105,7 @@ export default function Ocr() {
 
           {imgURL ?           <img
             ref={handleImgRef}
-            className="max-h-[75vh] h-auto  object-cover"
+            className="max-h-80 w-auto object-contain"
             src={
               imgURL
             }
@@ -114,10 +115,12 @@ export default function Ocr() {
         }
 
         </ReactCrop>
+        </div>
       </div>
 
       <div className="flex-none h-[25vh] flex items-center justify-center">
-        <p className="text-lg">{text}</p>
+        <Textarea value={text} readOnly>
+        </Textarea>
       </div>
     </div>
   );

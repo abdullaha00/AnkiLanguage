@@ -8,6 +8,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { TbLanguageKatakana } from "react-icons/tb";
 import { GrScan } from "react-icons/gr";
 import { GiCardPick } from "react-icons/gi";
+import { MessageSquare } from "lucide-react";
 
 // Menu items.
 const items = [
@@ -25,6 +26,11 @@ const items = [
       title: "OCR",
       url: "/ocr",
       icon: GrScan,
+    },
+    {
+      title: "Chat",
+      url: "/chat",
+      icon: MessageSquare,
     }
   ];
 
