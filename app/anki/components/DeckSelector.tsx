@@ -1,4 +1,4 @@
-import { Combobox, Input } from "@rewind-ui/core";
+import { Combobox } from "@rewind-ui/core";
 
 interface DeckSelectorProps {
   deckArray: string[];
@@ -14,12 +14,18 @@ export default function DeckSelector({
   onDeckChange,
 }: DeckSelectorProps) {
   console.log(`rendering with initialvalue = ${currentDeck}`);
+  const handleChange = (value: string | string[] | null | undefined) => {
+    if (typeof value !== "string" || value === currentDeck) return;
+
+    setTimeout(() => onDeckChange(value), 0);
+  };
+
   return (
     <div>
-      <label>Select a deck: </label>
+      <label className="mb-1 block text-sm font-medium">Select a deck</label>
       <Combobox
         disabled={!isRunning}
-        searchable={false}
+        searchable={true}
         clearable={false}
         placeholder="Select a deck type..."
         radius="base"
@@ -27,9 +33,7 @@ export default function DeckSelector({
         withRing={false}
         initialValue={currentDeck}
         style={{ width: "320px" }}
-        onChange={(value: string) =>
-          value !== currentDeck && onDeckChange(value)
-        }
+        onChange={handleChange}
       >
         {deckArray.map((deck) => (
           <Combobox.Option

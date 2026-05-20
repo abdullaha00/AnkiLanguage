@@ -35,7 +35,7 @@ export default function useAnkiPage() {
 
   const [open, setOpen] = useState(false);
 
-  const kuromoji = require("kuromoji");
+  const kuromoji = require("@sglkc/kuromoji");
 
   // debugging
   useEffect(() => {
@@ -51,7 +51,9 @@ export default function useAnkiPage() {
   };
 
   useEffect(() => {
-    setInterval(check, 3000);
+    check();
+    const interval = setInterval(check, 3000);
+    return () => clearInterval(interval);
   }, []);
 
 
@@ -100,6 +102,11 @@ export default function useAnkiPage() {
   // currentNote changes -> refresh the sentence fields
   useEffect(() => {
     const fetchFields = async () => {
+      if (!currentNote) {
+        setFieldArray([]);
+        return;
+      }
+
       const v = await invoke("modelFieldNames", 6, { modelName: currentNote });
       if (v) setFieldArray(v);
     };
@@ -109,6 +116,8 @@ export default function useAnkiPage() {
 
   // 
   const refresh = async () => {
+    if (!currentDeck || !currentNote || !currentField) return;
+
     SetRefB(false);
     const s = new Set<string>();
     //console.log(`note:${currentNote} AND deck:${currentDeck}`);
@@ -122,6 +131,12 @@ export default function useAnkiPage() {
     kuromoji
       .builder({ dicPath: "/dict" })
       .build(function (_err: any, tokenizer: any) {
+        if (_err || !tokenizer) {
+          console.error(_err);
+          SetRefB(true);
+          return;
+        }
+
         data.forEach((x: any) => {
           //console.log(x);
           const sentence = x["fields"][currentField]["value"];
@@ -152,6 +167,12 @@ export default function useAnkiPage() {
     kuromoji
       .builder({ dicPath: "/dict" })
       .build(function (_err: any, tokenizer: any) {
+        // handle tokeniser bugs
+        if (_err || !tokenizer) {
+          console.error(_err);
+          return;
+        }
+
         addKnownTokens(tokenizer, text, s2, textArray);
         const { s3, intersectionArray, countU, countUA, x } =
           getKnownWordComparison(vocabArr, s2, textArray);
@@ -175,6 +196,12 @@ export default function useAnkiPage() {
     kuromoji
       .builder({ dicPath: "/dict" })
       .build(async (_err: any, tokenizer: any) => {
+        // missing tok.
+        if (_err || !tokenizer) {
+          console.error(_err);
+          return;
+        }
+
         const processFile = (file: Blob) => {
           return new Promise((resolve) => {
             const reader = new FileReader();

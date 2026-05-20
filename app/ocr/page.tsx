@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, ImgHTMLAttributes } from "react";
+import { useState, useCallback, useEffect } from "react";
 import ReactCrop, { type Crop } from "react-image-crop";
 import "react-image-crop/dist/ReactCrop.css";
 import Tesseract from "tesseract.js";
@@ -13,113 +13,135 @@ export default function Ocr() {
   const [imgRef, setImgRef] = useState<HTMLImageElement | undefined>();
   const [cropURL, setCropURL] = useState('');
 
-  useEffect(() => {
-    const handlePaste = async () => {
-      try {
-        const items = await navigator.clipboard.read();
-        const blobOut = await items[0].getType("image/png");
-        const data = URL.createObjectURL(blobOut);
-        setImgURL(data);
-
-        tess(data);
-      } catch (e) {
-        console.log(e);
-      }
-    };
-
-    window.addEventListener("paste", handlePaste);
-  }, []);
-
-  useEffect(() => { if (cropURL) tess(cropURL)}, [cropURL])
-
-  const tess = async (x: string) => {
+  const tess = useCallback(async (x: string) => {
     try {
-
       console.log(`RUNNING TESS ON ${x}`)
+      setText("Recognising text...");
       const {
         data: { text },
       } = await Tesseract.recognize(x, "jpn");
       setText(text);
     } catch (e) {
       console.error(e);
+      setText("OCR failed. Try a clearer crop or another image.");
     }
-  };
+  }, []);
 
-  const getCroppedImage = () => {
+  useEffect(() => {
+    const handlePaste = async () => {
+      try {
+        console.log("Handling paste event");
+        const items = await navigator.clipboard.read();
+        const imageItem = items.find((item) =>
+          item.types.some((type) => type.startsWith("image/"))
+        );
+        const imageType = imageItem?.types.find((type) => type.startsWith("image/"));
+
+        if (!imageItem || !imageType) return;
+
+        const blobOut = await imageItem.getType(imageType);
+        const data = URL.createObjectURL(blobOut);
+        setCrop(undefined);
+        setCropURL("");
+        setImgURL(data);
+
+        tess(data);
+      } catch {
+        setText("Could not read an image from the clipboard.");
+      }
+    };
+
+    window.addEventListener("paste", handlePaste);
+    return () => window.removeEventListener("paste", handlePaste);
+  }, [tess]);
+
+  useEffect(() => { if (cropURL) tess(cropURL)}, [cropURL, tess])
+
+  useEffect(() => {
+    return () => {
+      if (imgURL) URL.revokeObjectURL(imgURL);
+    };
+  }, [imgURL]);
+
+  const getCroppedImage = (selectedCrop: Crop) => {
     try {
       const canvas = document.createElement("canvas");
       const ctx = canvas.getContext("2d");
-      if (!crop || !imgRef || !ctx || !crop.width || !crop.height ) return;
+      if (!imgRef || !ctx || !selectedCrop.width || !selectedCrop.height ) return;
       const scaleX = imgRef.naturalWidth / imgRef.width;
       const scaleY = imgRef.naturalHeight / imgRef.height;
 
-      canvas.width = crop.width;
-      canvas.height = crop.height;
-
-      console.log(crop)
-      console.log(canvas)
-      console.log(scaleX)
-      console.log(scaleY)
-      console.log(imgRef)
+      canvas.width = selectedCrop.width;
+      canvas.height = selectedCrop.height;
 
       try {
       ctx.drawImage(
         imgRef,
-        crop.x * scaleX,
-        crop.y * scaleY,
-        crop.width * scaleX,
-        crop.height * scaleY,
+        selectedCrop.x * scaleX,
+        selectedCrop.y * scaleY,
+        selectedCrop.width * scaleX,
+        selectedCrop.height * scaleY,
         0,
         0,
-        crop.width,
-        crop.height
+        selectedCrop.width,
+        selectedCrop.height
       ); } catch (e) {}
 
       return canvas.toDataURL("image/png");
     } catch (e) {
-      console.log(e);
+      console.error(e);
     }
   };
 
-  const handleImgRef = (i: HTMLImageElement) => {
-    if (i) setImgRef(i);
-    console.log(i)
+  const handleImgRef = (i: HTMLImageElement | null) => {
+    setImgRef(i ?? undefined);
   };
 
   return (
-    <div className="flex flex-col h-screen">
+    <div className="flex h-screen flex-col gap-4 py-6">
+      <div>
+        <h1 className="text-2xl font-semibold">Screenshot OCR</h1>
+        <p className="text-sm text-muted-foreground">
+          Paste an image + crop region.
+        </p>
+      </div>
       <div
-        className="flex-1 flex items-center justify-center my-5 "
+        className="flex-1 flex items-center justify-center rounded-2xl border bg-card p-6"
         style={{ maxHeight: "75vh" }}
       >
-        <div className= {imgURL ? "border rounded-lg border-gray-100 h-[60image.pngvh] overflow-hidden" : ""}>
+        <div className= {imgURL ? "h-[60vh] overflow-hidden rounded-lg border border-gray-100" : ""}>
         <ReactCrop
           crop={crop}
           onChange={(c) => {
             setCrop(c);
-
-              const u = getCroppedImage();
-              if (u) setCropURL(u)
+          }}
+          onComplete={(c) => {
+            const u = getCroppedImage(c);
+            if (u) setCropURL(u)
           }}
         >
 
-          {imgURL ?           <img
+          {imgURL ?           <>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
             ref={handleImgRef}
             className="max-h-80 w-auto object-contain"
+            alt="Pasted image for OCR"
             src={
               imgURL
             }
           ></img>
+          </>
         
-            : <p>OCR page: ctrl+v an image, and crop to select text!</p>
+            : <p className="text-sm text-muted-foreground">Press Ctrl+V to paste an image, then crop to select text.</p>
         }
 
         </ReactCrop>
         </div>
       </div>
 
-      <div className="flex-none h-[25vh] flex items-center justify-center">
-        <Textarea value={text} readOnly>
+      <div className="flex-none">
+        <Textarea className="min-h-[22vh]" value={text} readOnly placeholder="OCR output will appear here.">
         </Textarea>
       </div>
     </div>

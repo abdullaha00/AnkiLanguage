@@ -13,6 +13,8 @@ const config: Config = {
           './src/**/*.{html,jsx,tsx}',
       // you can either add all styles
       './node_modules/@rewind-ui/core/dist/theme/styles/*.js',
+      // sandbox dev resolves Rewind from the parent install when node_modules is not copied.
+      '../../node_modules/@rewind-ui/core/dist/theme/styles/*.js',
       // OR you can add only the styles you need
       './node_modules/@rewind-ui/core/dist/theme/styles/Button.styles.js',
      // './node_modules/@rewind-ui/core/dist/theme/styles/Text.styles.js'

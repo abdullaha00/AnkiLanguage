@@ -34,7 +34,7 @@ import {
 import { useState, Fragment } from 'react';
 import { useChat } from '@ai-sdk/react';
 import { Response } from '@/components/ai-elements/response';
-import { GlobeIcon, RefreshCcwIcon, CopyIcon } from 'lucide-react';
+import { GlobeIcon, CopyIcon } from 'lucide-react';
 import {
   Source,
   Sources,
@@ -63,7 +63,7 @@ const AIChat = () => {
   const [input, setInput] = useState('');
   const [model, setModel] = useState<string>(models[0].value);
   const [webSearch, setWebSearch] = useState(false);
-  const { messages, sendMessage, status, regenerate } = useChat();
+  const { messages, sendMessage, status } = useChat();
 
   const handleSubmit = (message: PromptInputMessage) => {
     const hasText = Boolean(message.text);
@@ -74,9 +74,9 @@ const AIChat = () => {
     }
 
     sendMessage(
-      { 
+      {
         text: message.text || 'Sent with attachments',
-        files: message.files 
+        files: message.files
       },
       {
         body: {
@@ -93,6 +93,19 @@ const AIChat = () => {
       <div className="flex flex-col h-full">
         <Conversation className="h-full">
           <ConversationContent>
+            {messages.length === 0 && (
+              <div className="flex h-full flex-col items-center justify-center text-center">
+                <p className="text-sm font-medium uppercase tracking-[0.25em] text-muted-foreground">
+                  AI tutor chat
+                </p>
+                <h1 className="mt-3 text-3xl font-semibold">
+                  Ask for practice, explanations, or graded examples.
+                </h1>
+                <p className="mt-3 max-w-xl text-sm text-muted-foreground">
+                  EXPERIMENTAL
+                </p>
+              </div>
+            )}
             {messages.map((message) => (
               <div key={message.id}>
                 {message.role === 'assistant' && message.parts.filter((part) => part.type === 'source-url').length > 0 && (
@@ -127,7 +140,7 @@ const AIChat = () => {
                               </Response>
                             </MessageContent>
                           </Message>
-                          {message.role === 'assistant' && i === messages.length - 1 && (
+                          {message.role === 'assistant' && message.id === messages.at(-1)?.id && (
                             <Actions className="mt-2">
                               <Action
                                 onClick={() =>
@@ -206,7 +219,10 @@ const AIChat = () => {
                 </PromptInputModelSelectContent>
               </PromptInputModelSelect>
             </PromptInputTools>
-            <PromptInputSubmit disabled={!input && !status} status={status} />
+            <PromptInputSubmit
+              disabled={!input.trim() || status === 'submitted' || status === 'streaming'}
+              status={status}
+            />
           </PromptInputToolbar>
         </PromptInput>
       </div>
