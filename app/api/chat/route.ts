@@ -18,7 +18,7 @@ export async function POST(req: Request) {
     model: webSearch ? 'perplexity/sonar' : model,
     messages: convertToModelMessages(messages),
     system:
-      'You are a language learning tutor speaking in Japanese to teach Japanese to English learners',
+      'You are a language learning tutor speaking in Japanese to teach Japanese to English learners', //TODO: add vocab info
   });
 
   // send sources and reasoning back to the client

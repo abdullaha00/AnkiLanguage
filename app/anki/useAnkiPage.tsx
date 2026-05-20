@@ -1,6 +1,7 @@
 "use client";
 import { isAnkiConnectRunning, invoke } from "../utils/ankiConnect";
 import { useState, useEffect } from "react";
+import { addKnownTokens, getKnownWordComparison } from "./ankiPageHelpers";
 
 export default function useAnkiPage() {
   const [isRunning, setRunning] = useState(false);
@@ -151,47 +152,9 @@ export default function useAnkiPage() {
     kuromoji
       .builder({ dicPath: "/dict" })
       .build(function (_err: any, tokenizer: any) {
-        var tokens = tokenizer.tokenize(text);
-        tokens.forEach((token: any) => {
-          if (
-            token["word_type"] == "KNOWN" &&
-            token["pos_detail_2"] != "人名" &&
-            token["pos"] != "記号" &&
-            token["pos"] != "一般"
-          ) {
-            s2.add(token["basic_form"]);
-            textArray.push(token["basic_form"]);
-
-            if (token["basic_form"] == "後藤") console.log(token);
-          }
-        });
-
-        const s3 = new Set();
-        const intersectionArray = new Array();
-
-        const countU: { [key: string]: number } = {};
-
-        for (let w of vocabArr) {
-          if (s2.has(w)) {
-            s3.add(w);
-          }
-        }
-        let x = 0;
-
-        for (let w of textArray) {
-          if (vocabArr.includes(w)) {
-            x++;
-          } else {
-            if (countU[w]) {
-              countU[w]++;
-            } else {
-              countU[w] = 1;
-            }
-          }
-        }
-
-        const countUA = Object.entries(countU);
-        countUA.sort((a, b) => a[1] - b[1]).reverse();
+        addKnownTokens(tokenizer, text, s2, textArray);
+        const { s3, intersectionArray, countU, countUA, x } =
+          getKnownWordComparison(vocabArr, s2, textArray);
         setUnknownWordCounts(countUA);
 
         console.log(s2);
@@ -217,22 +180,13 @@ export default function useAnkiPage() {
             const reader = new FileReader();
 
             reader.onload = (e) => {
-              var tokens = tokenizer.tokenize(e.target ? e.target.result : "");
-              console.log(tokens);
-              tokens.forEach((token: any) => {
-                if (
-                  token["word_type"] == "KNOWN" &&
-                  token["pos_detail_2"] != "人名" &&
-                  token["pos"] != "記号" &&
-                  token["pos"] != "一般"
-                ) {
-                  s2.add(token["basic_form"]);
-                  textArray.push(token["basic_form"]);
-
-                  if (token["basic_form"] == "後藤") console.log(token);
-                }
-              });
-
+              addKnownTokens(
+                tokenizer,
+                e.target ? e.target.result : "",
+                s2,
+                textArray,
+                true,
+              );
               console.log(s2);
               resolve("done");
             };
@@ -250,33 +204,8 @@ export default function useAnkiPage() {
         console.log("s");
         console.log(s2);
 
-        const s3 = new Set();
-        const intersectionArray = new Array();
-
-        const countU: { [key: string]: number } = {};
-
-        for (let w of vocabArr) {
-          if (s2.has(w)) {
-            s3.add(w);
-          }
-        }
-
-        let x = 0;
-
-        for (let w of textArray) {
-          if (vocabArr.includes(w)) {
-            x++;
-          } else {
-            if (countU[w]) {
-              countU[w]++;
-            } else {
-              countU[w] = 1;
-            }
-          }
-        }
-
-        const countUA = Object.entries(countU);
-        countUA.sort((a, b) => a[1] - b[1]).reverse();
+        const { s3, intersectionArray, countU, countUA, x } =
+          getKnownWordComparison(vocabArr, s2, textArray);
         setUnknownWordCounts(countUA);
 
         console.log(s2);
